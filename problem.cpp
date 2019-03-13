@@ -7,7 +7,7 @@
 
 #define READ 1
 #define FIND 0
-#define MAX_LENGTH 176051
+// #define MAX_LENGTH 176051
 
 using namespace std;
 
@@ -18,27 +18,40 @@ vector<int> saveIndexVector;
 
 int line=0;
 
-int input();
 void saveAtDirectory();
-string splitWords(string item);
+void printWords(string words);
+void notFoundResult(int mid);
+int input();
 int wordsBinarySearch(int start, int end, string findWords);
+string splitWords(string item);
 string toLowerCase(string words);
+
 
 int main(){
 	saveAtDirectory();
-	if(input() == READ){
+	if(input() == READ)
 		printf("%d", line);
-	}
+
 	else {
-		wordsBinarySearch(0,  MAX_LENGTH, toLowerCase(string(findWords)));
+		int mid = wordsBinarySearch(0,  line+1, toLowerCase(string(findWords)));
 		if(!saveIndexVector.empty()){
 			for(int i = 0; i < saveIndexVector.size(); i++)
-				printf("%s\n", fullDirectory[saveIndexVector[i]].c_str());
+				printWords(fullDirectory[saveIndexVector[i]].c_str());
 		}
-		else{
-			printf("Not found.\n- - -");
-		}
+		else
+			notFoundResult(mid);
 	}
+}
+
+void printWords(string words){
+	printf("%s\n", words.c_str());
+}
+
+void notFoundResult(int mid){
+	printf("Not found.\n");
+	printWords(fullDirectory[mid].c_str());
+	printf("- - -\n");
+	printWords(fullDirectory[mid+1].c_str());
 }
 
 int input(){
@@ -56,13 +69,12 @@ int input(){
 void saveAtDirectory(){
 	string item;
 	ifstream inFile("dict.txt");
-	while(getline(inFile, item)){
+	while(getline(inFile, item))
 		if(item.compare("")!=0){
 			wordsDirecotry[line] = splitWords(item);
 			fullDirectory[line] = item;
 			line++;
 		}
-	}
 }
 
 string splitWords(string item){
@@ -85,17 +97,15 @@ string toLowerCase(string words){
 int wordsBinarySearch(int start, int end, string findWords){
 	int mid = (start + end)/2;
 	if(start > end)
-		return -1;
+		return mid;
 	if( wordsDirecotry[mid].compare(findWords) == 0 ){
-		saveIndexVector.push_back(mid);
 		return  mid;
 	}
-	else {
+	else 
 		if( wordsDirecotry[mid].compare(findWords) > 0)
 			return wordsBinarySearch(start ,mid-1 ,findWords);
 		else
 			return wordsBinarySearch(mid+1 ,end ,findWords);
-	}
 
 }
 

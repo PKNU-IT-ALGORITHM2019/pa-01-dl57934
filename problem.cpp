@@ -1,18 +1,22 @@
-#include <cstdio>
+#include <iostream>
 #include <string>
-#include <cstring>
+#include <string.h>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 
-#define READ 1
-#define FIND 0
-// #define MAX_LENGTH 176051
-
 using namespace std;
 
+#define FIND 0
+#define READ 1
+#define SIZE 2
+#define EXIT 3
+#define SAME 0
+#define DIFFERENCE_AT_LOW_AND_CAPITAL 32
+#define DONT_EXIST_FRONT_WORDS 0
+
 int line=0;
-char findWords[50];
+string findWord;
 string wordsDirecotry[180000];
 string fullDirectory[180000];
 vector<int> saveIndexVector;
@@ -20,38 +24,60 @@ vector<int> saveIndexVector;
 void completeFoundResult();
 void saveAtDirectory();
 void completeFoundResult();
-void notFoundResult(int mid);
+void notFoundResult(int findIndex);
 void printWords(string words);
 int input();
+int isSameCommand(const char* command , char request[]);
 int wordsBinarySearch(int start, int end, string findWords);
 string splitWords(string item);
 string toLowerCase(string words);
 
 
 int main(){
-	saveAtDirectory();
-	if(input() == READ)
-		printf("%d", line);
-	else {
-		int mid = wordsBinarySearch(0,  line+1, toLowerCase(string(findWords)));
-		 if(!saveIndexVector.empty())
-			completeFoundResult();
-		else
-			notFoundResult(mid);
+
+	while(1){
+		int inputReturn = input();
+
+		switch(inputReturn){
+			case SIZE:
+				printf("%d\n", line);
+				break;
+			case FIND:{
+				int nearIndex = wordsBinarySearch(0,  line+1, toLowerCase(findWord));
+				if(saveIndexVector.empty())
+					notFoundResult(nearIndex);	
+				else
+					completeFoundResult();
+				break;
+			}
+			case EXIT:
+				exit(1);
+				break;
+			
+		}	
 	}
 }
 
 int input(){
-	char command[10];
-	scanf("%s ", command);
-	
-	if(strcmp("find", command)==0){
-		gets(findWords);
-		return FIND;
+	char request[10];
+	cin >> request;
+	if(isSameCommand("read", request)){
+		saveAtDirectory();	
+		return READ;
 	}
+	else if(isSameCommand("find", request)){
+		getline(cin, findWord);
+		findWord = findWord.substr(1, findWord.size());
+		return FIND;
+	}else if(isSameCommand("size", request))
+		return SIZE;
+	
+	else if(isSameCommand("exit", request))
+		return EXIT;
+}
 
-	printf("size\n");
-	return READ;
+int isSameCommand(const char* command , char request[]){
+	return strcmp(command, request) == SAME;
 }
 
 void printWords(string words){
@@ -59,23 +85,28 @@ void printWords(string words){
 }
 
 void completeFoundResult(){
-	printf("Found %d items.\n", saveIndexVector.size());
+	printf("Found %lu items.\n", saveIndexVector.size());
 	for(int i = 0; i < saveIndexVector.size(); i++)
 		printWords(fullDirectory[saveIndexVector[i]]);
+	saveIndexVector.clear();
 }
 
-void notFoundResult(int mid){
-	printf("Not found.\n");
-	printWords(fullDirectory[mid]);
-	printf("- - -\n");
-	printWords(fullDirectory[mid+1]);
+void notFoundResult(int nearIndex){
+	if(nearIndex == DONT_EXIST_FRONT_WORDS)
+		printf("-1");
+	else{
+		printf("Not found.\n");
+		printWords(fullDirectory[nearIndex]);
+		printf("- - -\n");
+		printWords(fullDirectory[nearIndex+1]);
+	}
 }
 
 void saveAtDirectory(){
 	string item;
 	ifstream inFile("dict.txt");
 	while(getline(inFile, item))
-		if(item.compare("")!=0){
+		if(item.compare("")!=SAME){
 			wordsDirecotry[line] = splitWords(item);
 			fullDirectory[line] = item;
 			line++;
@@ -94,23 +125,22 @@ string toLowerCase(string words){
 	int wordsLen = words.size();	
 	for(int i = 0; i < wordsLen; i++)
 		if(words[i] >= 'a')
-			words[i] -= 32;
+			words[i] -= DIFFERENCE_AT_LOW_AND_CAPITAL;
 	return string(words).c_str();
 }
 
 int wordsBinarySearch(int start, int end, string findWords){
 	int mid = (start + end)/2;
-	if(start > end){
+	if(start > end)
 		return mid;
-	}
-	if( wordsDirecotry[mid].compare(findWords) == 0 ){
+	if( wordsDirecotry[mid].compare(findWords) == SAME ){
 		saveIndexVector.push_back(mid);
-		return wordsBinarySearch(mid+1, end, findWords)+ wordsBinarySearch(start, mid-1, findWords) ;
-		
+		return mid+ wordsBinarySearch(start ,mid-1 ,findWords) + wordsBinarySearch(mid+1, end, findWords);
 	}
 	else 
 		if( wordsDirecotry[mid].compare(findWords) > 0)
 			return wordsBinarySearch(start ,mid-1 ,findWords);
+		
 		else
 			return wordsBinarySearch(mid+1 ,end ,findWords);
 

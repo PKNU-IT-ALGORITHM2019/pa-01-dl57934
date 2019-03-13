@@ -11,16 +11,17 @@
 
 using namespace std;
 
+int line=0;
 char findWords[50];
 string wordsDirecotry[180000];
 string fullDirectory[180000];
 vector<int> saveIndexVector;
 
-int line=0;
-
+void completeFoundResult();
 void saveAtDirectory();
-void printWords(string words);
+void completeFoundResult();
 void notFoundResult(int mid);
+void printWords(string words);
 int input();
 int wordsBinarySearch(int start, int end, string findWords);
 string splitWords(string item);
@@ -34,8 +35,7 @@ int main(){
 	else {
 		int mid = wordsBinarySearch(0,  line+1, toLowerCase(string(findWords)));
 		 if(!saveIndexVector.empty())
-		 	for(int i = 0; i < saveIndexVector.size(); i++)
-				printWords(fullDirectory[saveIndexVector[i]]);
+			completeFoundResult();
 		else
 			notFoundResult(mid);
 	}
@@ -56,6 +56,12 @@ int input(){
 
 void printWords(string words){
 	printf("%s\n", words.c_str());
+}
+
+void completeFoundResult(){
+	printf("Found %d items.\n", saveIndexVector.size());
+	for(int i = 0; i < saveIndexVector.size(); i++)
+		printWords(fullDirectory[saveIndexVector[i]]);
 }
 
 void notFoundResult(int mid){
@@ -99,8 +105,8 @@ int wordsBinarySearch(int start, int end, string findWords){
 	}
 	if( wordsDirecotry[mid].compare(findWords) == 0 ){
 		saveIndexVector.push_back(mid);
-		wordsBinarySearch(start, mid-1, findWords);
-		wordsBinarySearch(mid+1, end, findWords);
+		return wordsBinarySearch(mid+1, end, findWords)+ wordsBinarySearch(start, mid-1, findWords) ;
+		
 	}
 	else 
 		if( wordsDirecotry[mid].compare(findWords) > 0)

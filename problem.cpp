@@ -31,16 +31,27 @@ int main(){
 	saveAtDirectory();
 	if(input() == READ)
 		printf("%d", line);
-
 	else {
 		int mid = wordsBinarySearch(0,  line+1, toLowerCase(string(findWords)));
-		if(!saveIndexVector.empty()){
-			for(int i = 0; i < saveIndexVector.size(); i++)
-				printWords(fullDirectory[saveIndexVector[i]].c_str());
-		}
+		 if(!saveIndexVector.empty())
+		 	for(int i = 0; i < saveIndexVector.size(); i++)
+				printWords(fullDirectory[saveIndexVector[i]]);
 		else
 			notFoundResult(mid);
 	}
+}
+
+int input(){
+	char command[10];
+	scanf("%s ", command);
+	
+	if(strcmp("find", command)==0){
+		gets(findWords);
+		return FIND;
+	}
+
+	printf("size\n");
+	return READ;
 }
 
 void printWords(string words){
@@ -49,21 +60,9 @@ void printWords(string words){
 
 void notFoundResult(int mid){
 	printf("Not found.\n");
-	printWords(fullDirectory[mid].c_str());
+	printWords(fullDirectory[mid]);
 	printf("- - -\n");
-	printWords(fullDirectory[mid+1].c_str());
-}
-
-int input(){
-	char command[10];
-	scanf("%s", command);
-	
-	if(strcmp("find", command)==0){
-		scanf("%s", findWords);
-		return FIND;
-	}
-	printf("size\n");
-	return READ;
+	printWords(fullDirectory[mid+1]);
 }
 
 void saveAtDirectory(){
@@ -80,9 +79,8 @@ void saveAtDirectory(){
 string splitWords(string item){
 	char *cpyStr = new char[10000];
 	strcpy(cpyStr, item.c_str());
-
-	string words = strtok(cpyStr, " ");
-
+	string words = strtok(cpyStr, "(");
+	words = words.substr(0, words.length()-1);
 	return toLowerCase(words);
 }	
 
@@ -96,10 +94,13 @@ string toLowerCase(string words){
 
 int wordsBinarySearch(int start, int end, string findWords){
 	int mid = (start + end)/2;
-	if(start > end)
+	if(start > end){
 		return mid;
+	}
 	if( wordsDirecotry[mid].compare(findWords) == 0 ){
-		return  mid;
+		saveIndexVector.push_back(mid);
+		wordsBinarySearch(start, mid-1, findWords);
+		wordsBinarySearch(mid+1, end, findWords);
 	}
 	else 
 		if( wordsDirecotry[mid].compare(findWords) > 0)

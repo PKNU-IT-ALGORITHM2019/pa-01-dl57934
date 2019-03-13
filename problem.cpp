@@ -2,7 +2,6 @@
 #include <string>
 #include <cstring>
 #include <fstream>
-#include <string.h>
 #include <vector>
 #include <algorithm>
 
@@ -15,7 +14,7 @@ using namespace std;
 char findWords[50];
 string wordsDirecotry[180000];
 string fullDirectory[180000];
-std::vector<int> saveIndexVector;
+vector<int> saveIndexVector;
 
 int line=0;
 
@@ -23,6 +22,7 @@ int input();
 void saveAtDirectory();
 string splitWords(string item);
 int wordsBinarySearch(int start, int end, string findWords);
+string toLowerCase(string words);
 
 int main(){
 	saveAtDirectory();
@@ -30,10 +30,10 @@ int main(){
 		printf("%d", line);
 	}
 	else {
-		int index = wordsBinarySearch(0,  MAX_LENGTH, string(findWords));
+		wordsBinarySearch(0,  MAX_LENGTH, toLowerCase(string(findWords)));
 		if(!saveIndexVector.empty()){
 			for(int i = 0; i < saveIndexVector.size(); i++)
-			printf("%s\n", fullDirectory[saveIndexVector[i]].c_str());
+				printf("%s\n", fullDirectory[saveIndexVector[i]].c_str());
 		}
 		else{
 			printf("Not found.\n- - -");
@@ -69,9 +69,17 @@ string splitWords(string item){
 	char *cpyStr = new char[10000];
 	strcpy(cpyStr, item.c_str());
 
-	char *tok = strtok(cpyStr, " ");
+	string words = strtok(cpyStr, " ");
 
-	return string(tok).c_str();
+	return toLowerCase(words);
+}	
+
+string toLowerCase(string words){
+	int wordsLen = words.size();	
+	for(int i = 0; i < wordsLen; i++)
+		if(words[i] >= 'a')
+			words[i] -= 32;
+	return string(words).c_str();
 }
 
 int wordsBinarySearch(int start, int end, string findWords){
@@ -79,11 +87,8 @@ int wordsBinarySearch(int start, int end, string findWords){
 	if(start > end)
 		return -1;
 	if( wordsDirecotry[mid].compare(findWords) == 0 ){
-		for(int i = mid+1; i < MAX_LENGTH-saveIndexVector.size(); i++)
-			wordsDirecotry[i-1] = wordsDirecotry[i];
-		printf("%d\n",mid+saveIndexVector.size());
 		saveIndexVector.push_back(mid);
-		return  wordsBinarySearch(0,  MAX_LENGTH-saveIndexVector.size(), string(findWords));
+		return  mid;
 	}
 	else {
 		if( wordsDirecotry[mid].compare(findWords) > 0)
@@ -93,6 +98,8 @@ int wordsBinarySearch(int start, int end, string findWords){
 	}
 
 }
+
+
 
 
 

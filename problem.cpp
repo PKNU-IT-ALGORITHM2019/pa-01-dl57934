@@ -12,6 +12,7 @@ using namespace std;
 #define SIZE 2
 #define EXIT 3
 #define SAME 0
+#define NOT_SAME 1
 #define DIFFERENCE_AT_LOW_AND_CAPITAL 32
 #define DONT_EXIST_FRONT_WORDS 0
 
@@ -24,11 +25,15 @@ vector<int> saveIndexVector;
 void completeFoundResult();
 void saveAtDirectory();
 void completeFoundResult();
+int isSameWords(int findIndex);
+void arrayCheck(int findIndex);
+int arrayCheckCalculate(int findIndex);
+void findNearWords(int findIndex);
 void notFoundResult(int findIndex);
 void printWords(string words);
 int input();
 int isSameCommand(const char* command , char request[]);
-int wordsBinarySearch(int start, int end, string findWords);
+int wordsBinarySearch(int start, int end);
 string splitWords(string item);
 string toLowerCase(string words);
 
@@ -43,7 +48,8 @@ int main(){
 				printf("%d\n", line);
 				break;
 			case FIND:{
-				int nearIndex = wordsBinarySearch(0,  line+1, toLowerCase(findWord));
+				printf("find Word %s", findWord.c_str());
+				int nearIndex = wordsBinarySearch(0,  line+1);
 				if(saveIndexVector.empty())
 					notFoundResult(nearIndex);	
 				else
@@ -52,8 +58,6 @@ int main(){
 			}
 			case EXIT:
 				exit(1);
-				break;
-			
 		}	
 	}
 }
@@ -68,6 +72,7 @@ int input(){
 	else if(isSameCommand("find", request)){
 		getline(cin, findWord);
 		findWord = findWord.substr(1, findWord.size());
+		findWord = toLowerCase(findWord);
 		return FIND;
 	}else if(isSameCommand("size", request))
 		return SIZE;
@@ -129,21 +134,47 @@ string toLowerCase(string words){
 	return string(words).c_str();
 }
 
-int wordsBinarySearch(int start, int end, string findWords){
+int wordsBinarySearch(int start, int end){
 	int mid = (start + end)/2;
 	if(start > end)
 		return mid;
-	if( wordsDirecotry[mid].compare(findWords) == SAME ){
-		saveIndexVector.push_back(mid);
-		return mid+ wordsBinarySearch(start ,mid-1 ,findWords) + wordsBinarySearch(mid+1, end, findWords);
+	if(isSameWords(mid)){
+		findNearWords(mid);
+		return mid;
 	}
 	else 
-		if( wordsDirecotry[mid].compare(findWords) > 0)
-			return wordsBinarySearch(start ,mid-1 ,findWords);
+		if( wordsDirecotry[mid].compare(findWord) > 0)
+			return wordsBinarySearch(start ,mid-1);
 		
 		else
-			return wordsBinarySearch(mid+1 ,end ,findWords);
+			return wordsBinarySearch(mid+1 ,end);
+}
 
+void findNearWords(int findIndex){
+	saveIndexVector.push_back(findIndex);
+	arrayCheck(findIndex);	
+}
+
+void arrayCheck(int findIndex){
+	for(int i = findIndex-1; i >= 0; i--)
+		if(arrayCheckCalculate(i) == NOT_SAME)
+			break;
+
+	for(int i = findIndex+1; i <= line; i++)
+		if(arrayCheckCalculate(i) == NOT_SAME)
+			break;
+	
+}
+
+int arrayCheckCalculate(int findIndex){
+	if(!isSameWords(findIndex))
+			return NOT_SAME;
+	saveIndexVector.push_back(findIndex);
+	return SAME;
+}
+
+int isSameWords(int findIndex){
+	return wordsDirecotry[findIndex].compare(findWord) == SAME;
 }
 
 
